@@ -3,6 +3,10 @@ package handlers
 import (
 	"database/sql"
 	"fmt"
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
+
+	"log"
 	"os"
 )
 
@@ -25,10 +29,12 @@ func ConfigFromEnv() Config {
 }
 
 func DatabaseConnection() (*sql.DB, error) {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 	cfg := ConfigFromEnv()
-
 	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.DbName)
-
 	return sql.Open("postgres", psqlInfo)
 }
