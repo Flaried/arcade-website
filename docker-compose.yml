@@ -10,11 +10,13 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - private-network
+    ports:
+      - "5432:5432"  # Expose PostgreSQL on host machine
 networks:
   public-network:
     driver: bridge
   private-network:
-    internal: true
+    internal: false
 
 volumes:
   postgres_data:
