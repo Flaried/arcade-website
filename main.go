@@ -1,8 +1,8 @@
 package main
 
 import (
+	"arcade-website/components"
 	"arcade-website/handlers"
-	"arcade-website/templates"
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"log"
@@ -18,38 +18,18 @@ func main() {
 		log.Fatal("Failed to get database connection..")
 	}
 	defer db.Close()
-
-	fmt.Println("Connected to server..")
-
-	players, err := handlers.FetchUsers(db)
-	if err != nil {
-		log.Fatalf("Error fetching users: %s", err.Error())
-	}
-	fmt.Println(players)
+	fmt.Println("Connected to database")
 
 	e := echo.New()
-	e.Renderer = templates.NewTemplate()
-
-	e.GET("/", func(c echo.Context) error {
-		data := PageData{Players: players}
-		return c.Render(200, "index", data)
-	})
 
 	e.GET("/submit/:game_id", func(c echo.Context) error {
 		gameID := c.Param("game_id")
-		return c.Render(200, "submit-index", map[string]any{
-			"gameID": gameID,
-		})
+		print(gameID)
+		component := components.ScoreSubmission(gameID)
+		return component.Render(c.Request().Context(), c.Response().Writer)
 	})
+	e.POST("/upload", handlers.UploadScore(db))
 
-	//e.Use(middleware.BodyLimit("10M"))
-	e.POST("/upload", handlers.UploadScore())
-	e.POST("/users", func(c echo.Context) error {
-		fmt.Println(players)
-		data := PageData{Players: players}
-		return c.Render(200, "player-block", data)
-	})
-
-	fmt.Println("Started Server..")
+	fmt.Println("Started Server on :6969")
 	e.Logger.Fatal(e.Start("localhost:6969"))
 }
