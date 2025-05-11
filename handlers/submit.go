@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"arcade-website/components"
 	"bytes"
 	"database/sql"
 	"fmt"
@@ -10,6 +11,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -107,5 +109,38 @@ func UploadScore(db *sql.DB) echo.HandlerFunc {
 		fmt.Println(Submission)
 
 		return c.NoContent(200)
+	}
+}
+
+func SearchUser(db *sql.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		var userForm components.UserSearchForm
+		users, err := GetAllUsers(db)
+		fmt.Println(users)
+		if err != nil {
+			userForm.GeneralErrors = append(userForm.GeneralErrors, "Database error: "+err.Error())
+
+			return components.UserResults(userForm).Render(c.Request().Context(), c.Response().Writer)
+		}
+
+		optionQuery := c.Param("option")
+		query := c.QueryParam("inputData")
+		fmt.Println(optionQuery, "query option")
+		if optionQuery == "initials" {
+			for _, user := range users {
+				if strings.Contains(strings.ToLower(user.Initials), strings.ToLower(query)) {
+					userForm.Fields = append(userForm.Fields, user.Username)
+				}
+			}
+
+		} else {
+			for _, user := range users {
+				if strings.Contains(strings.ToLower(user.Username), strings.ToLower(query)) {
+					userForm.Fields = append(userForm.Fields, user.Username)
+				}
+			}
+		}
+
+		return components.UserResults(userForm).Render(c.Request().Context(), c.Response().Writer)
 	}
 }
