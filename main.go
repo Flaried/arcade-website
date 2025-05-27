@@ -1,9 +1,6 @@
 package main
 
 import (
-	"arcade-website/components"
-	"arcade-website/database"
-	"arcade-website/handlers"
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"log"
