@@ -68,6 +68,7 @@ func UploadScore(db *sql.DB) echo.HandlerFunc {
 		// c.Request().Body = http.MaxBytesReader(c.Response().Writer, c.Request().Body, 30*1024*1024)
 		//
 		Submission.Score = c.FormValue("score")
+		fmt.Println(c.FormValue)
 		Submission.Username = c.FormValue("username")
 		Submission.Initials = c.FormValue("initials")
 		Submission.GameID = c.FormValue("game_id")

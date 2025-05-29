@@ -2,24 +2,19 @@ package main
 
 import (
 	"arcade-website/internal/database-init"
-	"arcade-website/model"
 	"arcade-website/pkg/database"
 	"arcade-website/templs"
 	"fmt"
-	"log"
-
 	"github.com/labstack/echo/v4"
+	"log"
 )
-
-type PageData struct {
-	Players []model.Player
-}
 
 func main() {
 	db, err := database_init.DatabaseConnection()
 	if err != nil {
 		log.Fatal("Failed to get database connection..")
 	}
+
 	defer db.Close()
 	fmt.Println("Connected to database")
 
