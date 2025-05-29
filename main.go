@@ -1,17 +1,22 @@
 package main
 
 import (
+	"arcade-website/components"
+	"arcade-website/internal/database-init"
+	"arcade-website/model"
+	"arcade-website/pkg/database"
 	"fmt"
-	"github.com/labstack/echo/v4"
 	"log"
+
+	"github.com/labstack/echo/v4"
 )
 
 type PageData struct {
-	Players []handlers.Player
+	Players []model.Player
 }
 
 func main() {
-	db, err := database.DatabaseConnection()
+	db, err := database_init.DatabaseConnection()
 	if err != nil {
 		log.Fatal("Failed to get database connection..")
 	}
@@ -27,9 +32,9 @@ func main() {
 		return component.Render(c.Request().Context(), c.Response().Writer)
 	})
 
-	e.POST("/upload", handlers.UploadScore(db))
+	e.POST("/upload", database.UploadScore(db))
 
-	e.GET("/search/:option", handlers.SearchUser(db))
+	// e.GET("/search/:option", database.SearchUser(db))
 
 	e.GET("/set-username", func(c echo.Context) error {
 		username := c.QueryParam("username")

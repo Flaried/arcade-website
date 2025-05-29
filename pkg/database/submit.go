@@ -1,7 +1,6 @@
-package handlers
+package database
 
 import (
-	"arcade-website/components"
 	"bytes"
 	"database/sql"
 	"fmt"
@@ -11,7 +10,6 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
-	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -25,14 +23,14 @@ func sanatizePicture(imageForm *multipart.FileHeader) ([]byte, error) {
 
 	fileSrc, err := imageForm.Open()
 	if err != nil {
-		return nil, fmt.Errorf("Failed to open uploaded file %s", err.Error())
+		return nil, fmt.Errorf("failed to open uploaded file %s", err.Error())
 	}
 
 	defer fileSrc.Close() // Always close the file
 
 	fileBytes, err := io.ReadAll(fileSrc)
 	if err != nil {
-		return nil, fmt.Errorf("Cannot read file bytes %s", err.Error())
+		return nil, fmt.Errorf("cannot read file bytes %s", err.Error())
 	}
 
 	detectedType := http.DetectContentType(fileBytes)
@@ -42,14 +40,14 @@ func sanatizePicture(imageForm *multipart.FileHeader) ([]byte, error) {
 
 	imageDecoded, err := jpeg.Decode(bytes.NewReader(fileBytes))
 	if err != nil {
-		return nil, fmt.Errorf("Cannot decode Image... %s", err.Error())
+		return nil, fmt.Errorf("cannot decode Image... %s", err.Error())
 	}
 
 	var buf bytes.Buffer
 
 	err = jpeg.Encode(&buf, imageDecoded, &jpeg.Options{Quality: 25})
 	if err != nil {
-		return nil, fmt.Errorf("Cannot Encode Image... %s", err.Error())
+		return nil, fmt.Errorf("cannot Encode Image... %s", err.Error())
 	}
 
 	return buf.Bytes(), nil
@@ -102,45 +100,45 @@ func UploadScore(db *sql.DB) echo.HandlerFunc {
 			return c.HTML(400, `<div class="text-red-500">Error Creating Image file</div>`)
 		}
 
-		// _, err = db.Exec("INSERT INTO users (username, initials) VALUES ($1, $2)")
-		// if err != nil {
-		// 	return c.HTML(400, `<div class="text-red-500">Error Writing to Databases File</div>`)
-		// }
-		fmt.Println(Submission)
+		fmt.Println("Submission", Submission, Submission.Username)
+		_, err = db.Exec("INSERT INTO users (username, initials) VALUES ($1, $2)", Submission.Username, Submission.Initials)
+		if err != nil {
+			return c.HTML(400, `<div class="text-red-500">Error Writing to Databases File</div>`)
+		}
 
 		return c.NoContent(200)
 	}
 }
 
-func SearchUser(db *sql.DB) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		var userForm components.UserSearchForm
-		users, err := GetAllUsers(db)
-		fmt.Println(users)
-		if err != nil {
-			userForm.GeneralErrors = append(userForm.GeneralErrors, "Database error: "+err.Error())
-
-			return components.UserResults(userForm).Render(c.Request().Context(), c.Response().Writer)
-		}
-
-		optionQuery := c.Param("option")
-		query := c.QueryParam("inputData")
-		fmt.Println(optionQuery, "query option")
-		if optionQuery == "initials" {
-			for _, user := range users {
-				if strings.Contains(strings.ToLower(user.Initials), strings.ToLower(query)) {
-					userForm.Fields = append(userForm.Fields, user.Username)
-				}
-			}
-
-		} else {
-			for _, user := range users {
-				if strings.Contains(strings.ToLower(user.Username), strings.ToLower(query)) {
-					userForm.Fields = append(userForm.Fields, user.Username)
-				}
-			}
-		}
-
-		return components.UserResults(userForm).Render(c.Request().Context(), c.Response().Writer)
-	}
-}
+// func SearchUser(db *sql.DB) echo.HandlerFunc {
+// 	return func(c echo.Context) error {
+// 		var userForm components.UserSearchForm
+// 		users, err := GetAllUsers(db)
+// 		fmt.Println(users)
+// 		if err != nil {
+// 			userForm.GeneralErrors = append(userForm.GeneralErrors, "Database error: "+err.Error())
+//
+// 			return components.UserResults(userForm).Render(c.Request().Context(), c.Response().Writer)
+// 		}
+//
+// 		optionQuery := c.Param("option")
+// 		query := c.QueryParam("inputData")
+// 		fmt.Println(optionQuery, "query option")
+// 		if optionQuery == "initials" {
+// 			for _, user := range users {
+// 				if strings.Contains(strings.ToLower(user.Initials), strings.ToLower(query)) {
+// 					userForm.Fields = append(userForm.Fields, user.Username)
+// 				}
+// 			}
+//
+// 		} else {
+// 			for _, user := range users {
+// 				if strings.Contains(strings.ToLower(user.Username), strings.ToLower(query)) {
+// 					userForm.Fields = append(userForm.Fields, user.Username)
+// 				}
+// 			}
+// 		}
+//
+// 		return components.UserResults(userForm).Render(c.Request().Context(), c.Response().Writer)
+// 	}
+// }
