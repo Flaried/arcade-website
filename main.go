@@ -1,10 +1,10 @@
 package main
 
 import (
-	"arcade-website/components"
 	"arcade-website/internal/database-init"
 	"arcade-website/model"
 	"arcade-website/pkg/database"
+	"arcade-website/templs"
 	"fmt"
 	"log"
 
@@ -28,7 +28,7 @@ func main() {
 	e.GET("/submit/:game_id", func(c echo.Context) error {
 		gameID := c.Param("game_id")
 		print(gameID)
-		component := components.ScoreSubmission(gameID)
+		component := templs.ScoreSubmission(gameID)
 		return component.Render(c.Request().Context(), c.Response().Writer)
 	})
 
@@ -41,7 +41,7 @@ func main() {
 		if username == "" {
 			fmt.Println("Is initials")
 		}
-		component := components.UsernameInput(username)
+		component := templs.UsernameInput(username)
 		return component.Render(c.Request().Context(), c.Response().Writer)
 	})
 
