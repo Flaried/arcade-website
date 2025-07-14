@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-func UploadScore(db *sql.DB) echo.HandlerFunc {
+func PostScore(db *sql.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		//var serverMessages []string
 		var Submission model.FormSubmission
@@ -17,10 +17,12 @@ func UploadScore(db *sql.DB) echo.HandlerFunc {
 		// c.Request().Body = http.MaxBytesReader(c.Response().Writer, c.Request().Body, 30*1024*1024)
 		//
 		Submission.Score = c.FormValue("score")
+
 		fmt.Println(c.FormValue)
 		Submission.Username = c.FormValue("username")
 		Submission.Initials = c.FormValue("initials")
 		Submission.GameID = c.FormValue("game_id")
+
 		//TODO: EXIT/sanatize all form values
 
 		file, err := c.FormFile("photo")
