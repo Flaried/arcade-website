@@ -1,0 +1,47 @@
+package submit
+
+import "arcade-website/internal/model"
+
+templ UserResults(form model.UserSearchForm) {
+	<div class="mt-2" name="search-result">
+		if len(form.GeneralErrors) > 0 {
+			@ErrorMessages(form.GeneralErrors)
+		}
+		if len(form.Fields) > 0 {
+			@SearchResults(form.Fields, form.IsUsername)
+		}
+	</div>
+}
+
+templ ErrorMessages(errors []string) {
+	<div class={ errorClass } name="error">
+		for _, err := range errors {
+			<p>{ err }</p>
+		}
+	</div>
+}
+
+templ SearchResults(usernames []string, isUsername bool) {
+	<div class="border rounded mt-1 divide-y" name="Valid Search">
+		for _, username := range usernames {
+			<div class="result-item">
+				@UserResultButton(username, isUsername)
+			</div>
+		}
+	</div>
+}
+
+templ UserResultButton(username string, isUsername bool) {
+	<button
+		type="button"
+		if isUsername {
+			hx-get={ "/api/set-username?username=" + username }
+		} else {
+			hx-get={ "/api/set-username?initials=" + username }
+		}
+		hx-target="#username-input"
+		hx-swap="outerHTML"
+	>
+		{ username }
+	</button>
+}

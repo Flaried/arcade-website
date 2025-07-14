@@ -1,6 +1,6 @@
 package templates
 
-templ Base(title string) {
+templ Base(title string, content templ.Component) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
@@ -11,13 +11,17 @@ templ Base(title string) {
 			<script src="https://cdn.tailwindcss.com"></script>
 		</head>
 		<body>
-			//NOTE: Nav bar is shared between pages so the idea is to put it in base
-			<nav>
-				<a href="/">Home</a>
+			<!-- Nav bar is shared between pages -->
+			<nav class="bg-gray-800 text-white p-4">
+				<div class="container mx-auto">
+					<a href="/" class="text-white hover:text-gray-300">Home</a>
+				</div>
 			</nav>
-			<h1>{ title }</h1>
-			//NOTE: Any chidlren of the component will be rendered in the body tag
-			{ children... }
+			<main>
+				<h1 class="text-3xl font-bold text-center my-6">{ title }</h1>
+				<!-- The content component gets rendered here -->
+				@content
+			</main>
 		</body>
 	</html>
 }
