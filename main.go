@@ -1,16 +1,18 @@
 package main
 
 import (
-	"arcade-website/internal/database-init"
-	"arcade-website/pkg/database"
-	"arcade-website/templs"
+	"arcade-website/internal/database"
+	"arcade-website/internal/handlers"
+	"arcade-website/internal/templates"
+
 	"fmt"
-	"github.com/labstack/echo/v4"
 	"log"
+
+	"github.com/labstack/echo/v4"
 )
 
 func main() {
-	db, err := database_init.DatabaseConnection()
+	db, err := database.DatabaseConnection()
 	if err != nil {
 		log.Fatal("Failed to get database connection..")
 	}
@@ -23,11 +25,11 @@ func main() {
 	e.GET("/submit/:game_id", func(c echo.Context) error {
 		gameID := c.Param("game_id")
 		print(gameID)
-		component := templs.ScoreSubmission(gameID)
+		component := templates.ScoreSubmission(gameID)
 		return component.Render(c.Request().Context(), c.Response().Writer)
 	})
 
-	e.POST("/upload", database.UploadScore(db))
+	e.POST("/upload", handlers.UploadScore(db))
 
 	// e.GET("/search/:option", database.SearchUser(db))
 
@@ -36,7 +38,7 @@ func main() {
 		if username == "" {
 			fmt.Println("Is initials")
 		}
-		component := templs.UsernameInput(username)
+		component := templates.UsernameInput(username)
 		return component.Render(c.Request().Context(), c.Response().Writer)
 	})
 
