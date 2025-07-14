@@ -1,20 +1,14 @@
-package database
+package handlers
 
 import (
+	"arcade-website/internal/model"
 	"database/sql"
 	"fmt"
 	"log"
-	"time"
 )
 
-type Player struct {
-	Username  string
-	Initials  string
-	CreatedAt time.Time
-}
-
 func GetUserByID(db *sql.DB, user_id int32) error {
-	var newPlayer Player
+	var newPlayer model.Player
 	dbQuery := "SELECT username, initials, created_at FROM users WHERE user_id = $1"
 	dbRows := db.QueryRow(dbQuery, user_id)
 

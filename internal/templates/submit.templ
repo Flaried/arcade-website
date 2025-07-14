@@ -1,14 +1,9 @@
-package templs
+package templates
 
-type UserSearchForm struct {
-	Fields        []string
-	FieldErrors   map[string]string
-	GeneralErrors []string
-	IsUsername    bool
-}
+import "arcade-website/internal/model"
 
 // TODO: make the query username or initials and then choose the target based on that
-templ UserResults(form UserSearchForm) {
+templ UserResults(form model.UserSearchForm) {
 	<div class="mt-2" name="search-result">
 		if len(form.GeneralErrors) > 0 {
 			<div class="text-red-500 text-sm p-2 bg-red-50 rounded" name="error">
