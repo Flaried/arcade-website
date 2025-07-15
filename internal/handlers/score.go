@@ -9,6 +9,7 @@ import (
 	"os"
 )
 
+// TODO: return errors and html more gracefully
 func PostScore(db *sql.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		//var serverMessages []string
@@ -29,35 +30,40 @@ func PostScore(db *sql.DB) echo.HandlerFunc {
 		if err != nil {
 			log.Println(err.Error())
 			// TODO: RETURN ERROR
-			return c.HTML(400, `<div class="text-red-500">Missing file upload</div>`)
+			c.Response().Header().Set("HX-Reswap", "innerHTML")
+			return c.HTML(200, `<div class="text-red-500">Missing file upload</div>`)
 		}
 
-		imageBytes, err := sanatizePicture(file)
+		imageBytes, err := validatePicture(file)
 		if err != nil {
+			c.Response().Header().Set("HX-Reswap", "innerHTML")
 			fmt.Println(err.Error())
-			return c.HTML(400, `<div class="text-red-500">Error Sanaizing file</div>`)
+			return c.HTML(200, `<div class="text-red-500">Error Sanaizing file</div>`)
 		}
 
 		savedPath := fmt.Sprintf("scores/%s_%s_%s_%s.jpeg", Submission.GameID, Submission.Username, Submission.Score, "pending")
 		f, err := os.Create(savedPath)
 		if err != nil {
 			log.Println(err.Error())
-			return c.HTML(400, `<div class="text-red-500">Error Downloading file</div>`)
+			c.Response().Header().Set("HX-Reswap", "innerHTML")
+			return c.HTML(200, `<div class="text-red-500">Error Downloading file</div>`)
 		}
 		defer f.Close()
 
 		_, err = f.Write(imageBytes)
 		if err != nil {
 			log.Println(err.Error())
-			return c.HTML(400, `<div class="text-red-500">Error Creating Image file</div>`)
+			c.Response().Header().Set("HX-Reswap", "innerHTML")
+			return c.HTML(200, `<div class="text-red-500">Error Creating Image file</div>`)
 		}
 
 		fmt.Println("Submission", Submission, Submission.Username)
 		_, err = db.Exec("INSERT INTO users (username, initials) VALUES ($1, $2)", Submission.Username, Submission.Initials)
 		if err != nil {
-			return c.HTML(400, `<div class="text-red-500">Error Writing to Databases File</div>`)
+			c.Response().Header().Set("HX-Reswap", "innerHTML")
+			return c.HTML(200, `<div class="text-red-500">Error Writing to Database File</div>`)
 		}
 
-		return c.NoContent(200)
+		return c.HTML(200, `<div class="text-green-500">Sucessfully Published Score</div>`)
 	}
 }
