@@ -9,11 +9,10 @@ import (
 	"net/http"
 )
 
-func sanatizePicture(imageForm *multipart.FileHeader) ([]byte, error) {
+func validatePicture(imageForm *multipart.FileHeader) ([]byte, error) {
 	allowedTypes := map[string]bool{
 		"image/jpeg": true,
 		"image/png":  true,
-		"image/gif":  true,
 	}
 
 	fileSrc, err := imageForm.Open()
