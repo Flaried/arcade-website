@@ -1,9 +1,9 @@
-package handlers
+package api
 
 import (
+	"arcade-website/internal/handlers"
 	"arcade-website/internal/model"
 	"database/sql"
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -11,7 +11,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// TODO: return errors and html more gracefully
 func PostScore(db *sql.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		//var serverMessages []string
@@ -35,7 +34,7 @@ func PostScore(db *sql.DB) echo.HandlerFunc {
 			return c.HTML(200, `<div class="text-red-500">Missing file upload</div>`)
 		}
 
-		imageBytes, err := validatePicture(userFile)
+		imageBytes, err := handlers.ValidatePicture(userFile)
 		if err != nil {
 			c.Response().Header().Set("HX-Reswap", "innerHTML")
 			fmt.Println(err.Error())
@@ -44,7 +43,7 @@ func PostScore(db *sql.DB) echo.HandlerFunc {
 
 		savedPath := fmt.Sprintf("scores/%s_%s_%s_%s.jpeg", Submission.GameID, Submission.Username, Submission.Score, "pending")
 
-		err = savePicture(imageBytes, savedPath)
+		err = handlers.SavePicture(imageBytes, savedPath)
 		if err != nil {
 			return c.HTML(200, err.Error())
 		}
@@ -63,26 +62,4 @@ func PostScore(db *sql.DB) echo.HandlerFunc {
 
 		return c.HTML(200, `<div class="text-green-500">Sucessfully Published Score</div>`)
 	}
-}
-
-func savePicture(imageBytes []byte, path string) error {
-	file, err := os.Create(path)
-	if err != nil {
-		log.Println(err.Error())
-		return errors.New(`<div class="text-red-500">Error Downloading file</div>`)
-	}
-
-	_, err = file.Write(imageBytes)
-	if err != nil {
-		log.Println(err.Error())
-		// c.Response().Header().Set("HX-Reswap", "innerHTML")
-		return errors.New(`<div class="text-red-500">Error Creating Image file</div>`)
-	}
-
-	err = file.Close()
-	if err != nil {
-		return errors.New(`<div class="text-red-500">Error closing file</div>`)
-	}
-
-	return nil
 }
