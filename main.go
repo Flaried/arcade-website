@@ -1,8 +1,8 @@
 package main
 
 import (
+	"arcade-website/internal/api"
 	"arcade-website/internal/database"
-	"arcade-website/internal/handlers"
 	"arcade-website/internal/templates"
 	"arcade-website/internal/templates/submit"
 
@@ -41,7 +41,8 @@ func main() {
 	})
 
 	// APIs
-	e.POST("/api/upload", handlers.PostScore(db))
+	e.POST("/api/upload", api.PostScore(db))
+
 	// e.GET("/search/:option", database.SearchUser(db))
 	e.GET("/api/set-username", func(c echo.Context) error {
 		username := c.QueryParam("username")
