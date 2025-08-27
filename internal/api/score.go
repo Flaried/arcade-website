@@ -6,7 +6,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"os"
+	// "os"
 
 	"github.com/labstack/echo/v4"
 )
@@ -49,16 +49,37 @@ func PostScore(db *sql.DB) echo.HandlerFunc {
 		}
 
 		fmt.Println("Submission", Submission, Submission.Username)
-		_, err = db.Exec("INSERT INTO users (username, initials) VALUES ($1, $2)", Submission.Username, Submission.Initials)
-		if err != nil {
-			err = os.Remove(savedPath)
-			if err != nil {
-				fmt.Printf("Couldn't remove %s\n", savedPath)
-			}
+		var userID int
+		err = db.QueryRow("SELECT user_id FROM users WHERE username = $1", Submission.Username).Scan(&userID)
 
-			c.Response().Header().Set("HX-Reswap", "innerHTML")
-			return c.HTML(200, `<div class="text-red-500">Error Writing to Database File</div>`)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				// User doesn't exist → prompt to create new user
+				// TODO: IMPLEMENT CREATE USER PAGE OR API
+				c.Response().Header().Set("HX-Reswap", "innerHTML")
+				return c.HTML(200, fmt.Sprintf(`
+            <div class="text-yellow-500">
+                User "%s" not found. Do you want to create a new user?
+                <button hx-post="/create-user" hx-vals='{"username":"%s","initials":"%s"}'>Yes</button>
+            </div>
+        `, Submission.Username, Submission.Username, Submission.Initials))
+			} else {
+				// Some other DB error
+				fmt.Println("DB error:", err)
+				return c.HTML(200, `<div class="text-red-500">Error querying database</div>`)
+			}
 		}
+		// NOTE: THIS JUST MKAES A USER, DOESNT SAVE A SCORE.
+		// _, err = db.Exec("INSERT INTO users (username, initials) VALUES ($1, $2)", Submission.Username, Submission.Initials)
+		// if err != nil {
+		// 	err = os.Remove(savedPath)
+		// 	if err != nil {
+		// 		fmt.Printf("Couldn't remove %s\n", savedPath)
+		// 	}
+		//
+		// 	c.Response().Header().Set("HX-Reswap", "innerHTML")
+		// 	return c.HTML(200, `<div class="text-red-500">Error Writing to Database File</div>`)
+		// }
 
 		return c.HTML(200, `<div class="text-green-500">Sucessfully Published Score</div>`)
 	}
